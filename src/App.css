@@ -5,11 +5,46 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Core Pokémon-like theme colors */
+  /* Blue outline + yellow fill like the classic logo */
+  --poke-bg-start: #000000;
+  --poke-bg-mid: #1f3a93;
+  --poke-bg-end: #ffcb05;
+
+  --poke-primary: #1f3a93;      /* logo blue */
+  --poke-secondary: #2854c5;    /* lighter blue */
+  --poke-yellow: #ffcb05;       /* logo yellow */
+  --poke-yellow-soft: #ffe066;  /* softer yellow */
+  --poke-red: #c62828;          /* accent red */
+}
+
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #333;
+}
+
+/* Default app background */
+body[data-theme='default'] .app,
+body:not([data-theme]) .app {
+  background: linear-gradient(135deg, var(--poke-bg-start) 0%, var(--poke-bg-mid) 45%, var(--poke-bg-end) 100%);
+}
+
+/* Prismatic Evolutions background – light prismatic yellows to match pack */
+body[data-theme='prismatic'] .app {
+  background:
+    radial-gradient(circle at top, #ffffff 0, #fff9e6 35%, #ffe27b 65%, #f7c34a 100%);
+}
+
+/* Journey Together background – cool teal/white like the pack art */
+body[data-theme='journey'] .app {
+  background: radial-gradient(circle at top, #ffffff 0, #e8f9ff 30%, #a6efff 60%, #1cc4d8 100%);
+}
+
+/* Destined Rivals background – strong red with darker top, like pack */
+body[data-theme='destined'] .app {
+  background: linear-gradient(180deg, #3c1022 0%, #7a1226 35%, #b71624 70%, #e62828 100%);
 }
 
 .app {
@@ -31,12 +66,14 @@ body {
 .title {
   font-size: 2.5rem;
   font-weight: bold;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffecd2);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: prismaticText 3s ease-in-out infinite;
+  color: var(--poke-yellow);
+  /* Closer to the original "Poke Simulator" look: yellow fill with crisp blue outline and soft shadow */
+  text-shadow:
+    -2px -2px 0 var(--poke-primary),
+    2px -2px 0 var(--poke-primary),
+    -2px 2px 0 var(--poke-primary),
+    2px 2px 0 var(--poke-primary),
+    0 0 6px rgba(0, 0, 0, 0.5);
   margin-bottom: 15px;
 }
 
@@ -48,19 +85,19 @@ body {
   gap: 15px;
   margin-bottom: 20px;
   padding: 10px;
-  background: rgba(103, 126, 234, 0.1);
+  background: rgba(59, 76, 202, 0.08);
   border-radius: 15px;
-  border: 1px solid rgba(103, 126, 234, 0.2);
+  border: 1px solid rgba(59, 76, 202, 0.28);
 }
 
 .set-name {
   font-weight: bold;
-  color: #667eea;
+  color: var(--poke-primary);
   font-size: 1.1rem;
 }
 
 .set-select {
-  border: 1px solid rgba(103, 126, 234, 0.35);
+  border: 1px solid rgba(59, 76, 202, 0.4);
   border-radius: 10px;
   padding: 6px 10px;
   background: white;
@@ -75,8 +112,8 @@ body {
 }
 
 .set-total {
-  background: #667eea;
-  color: white;
+  background: var(--poke-yellow);
+  color: #2a2a2a;
   padding: 4px 8px;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -340,7 +377,7 @@ body {
   height: 380px;
   border-radius: 22px;
   padding: 4px;
-  background: linear-gradient(135deg, #ffe066, #ff6b6b, #845ef7, #4dabf7);
+  background: linear-gradient(135deg, var(--poke-yellow), var(--poke-red), var(--poke-primary), var(--poke-secondary));
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
   position: relative;
   overflow: hidden;
@@ -613,11 +650,11 @@ body {
 }
 
 .stat-fill.hp {
-  background: linear-gradient(90deg, #ff6b6b, #ffa94d);
+  background: linear-gradient(90deg, var(--poke-yellow), var(--poke-red));
 }
 
 .stat-fill.attack {
-  background: linear-gradient(90deg, #4dabf7, #9775fa);
+  background: linear-gradient(90deg, var(--poke-secondary), var(--poke-primary));
 }
 
 .pokemon-stats .stat-value {
@@ -656,7 +693,7 @@ body {
 .booster-pack {
   width: 280px;
   height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, var(--poke-primary) 0%, var(--poke-secondary) 45%, var(--poke-yellow) 100%);
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
@@ -666,6 +703,56 @@ body {
   transition: all 0.3s ease;
   border: 3px solid #fff;
   user-select: none;
+}
+
+/* Prismatic Evolutions: use only the pack image, no extra background */
+body[data-theme='prismatic'] .booster-pack {
+  background: transparent;
+  border-radius: 22px;
+  border: 3px solid #ffffff;
+}
+
+body[data-theme='prismatic'] .booster-pack::before {
+  content: none;
+}
+
+/* Journey Together pack colors – closer to official booster art */
+body[data-theme='journey'] .booster-pack {
+  /* Soft white glow at the top fading into rich teal blues */
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, #dff9ff 0%, #9eefff 30%, #1fd6e8 65%, #007da7 100%);
+  border-radius: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+}
+
+/* Journey Together subtle light beams / shine pattern */
+body[data-theme='journey'] .booster-pack::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(60deg, rgba(0, 220, 255, 0.4) 0%, rgba(0, 220, 255, 0) 55%);
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Destined Rivals pack colors – red with electric streaks feel */
+body[data-theme='destined'] .booster-pack {
+  background: linear-gradient(135deg, #3b1438 0%, #8b1431 45%, #ff7043 100%);
+}
+
+/* Journey Together booster image layout */
+.prismatic-pack-image,
+.journey-pack-image,
+.destined-pack-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  display: block;
 }
 
 .booster-pack:hover {
@@ -706,6 +793,31 @@ body {
   animation: logoShine 3s ease-in-out infinite;
 }
 
+/* Make Journey Together text clearer on light teal background */
+body[data-theme='journey'] .set-logo h3 {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: inherit;
+  color: #fefefe;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Make Prismatic Evolutions text clearer on warm yellow background */
+body[data-theme='prismatic'] .set-logo h3 {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: inherit;
+  color: var(--poke-yellow);
+  text-shadow:
+    -2px -2px 0 var(--poke-primary),
+    2px -2px 0 var(--poke-primary),
+    -2px 2px 0 var(--poke-primary),
+    2px 2px 0 var(--poke-primary),
+    0 0 6px rgba(0, 0, 0, 0.6);
+}
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
@@ -736,7 +848,7 @@ body {
   text-align: center;
   margin-bottom: 30px;
   font-size: 2.2rem;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-primary), var(--poke-red));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -868,7 +980,7 @@ body {
 .pull-announcement {
   font-size: 1.5rem;
   margin-bottom: 15px;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-primary), var(--poke-red));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -900,7 +1012,7 @@ body {
   padding: 12px 25px;
   font-size: 1.1rem;
   font-weight: bold;
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-red));
   color: white;
   border: none;
   border-radius: 20px;
@@ -957,7 +1069,7 @@ body {
 .stat-value {
   font-size: 1.8rem;
   font-weight: bold;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-primary));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -995,7 +1107,7 @@ body {
   height: 320px;
   border-radius: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, var(--poke-primary) 0%, var(--poke-secondary) 45%, var(--poke-yellow) 100%);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
@@ -1030,7 +1142,7 @@ body {
   font-size: 1.2rem;
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  background: linear-gradient(45deg, #ffd700, #fff, #ffd700);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-primary), var(--poke-yellow-soft));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1125,7 +1237,7 @@ body {
   backdrop-filter: blur(10px);
   font-size: 1.2rem;
   font-weight: bold;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+  background: linear-gradient(45deg, var(--poke-yellow), var(--poke-primary), var(--poke-red));
   background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;

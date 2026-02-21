@@ -1,13 +1,25 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import './App.css'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+// Prismatic Evolutions booster art file served from the public folder
+const PRISMATIC_PACK_IMAGE_URL = '/2_276528_e.webp'
+// Journey Together booster art file served from the public folder
+const JOURNEY_PACK_IMAGE_URL = '/2_284400_e.webp'
+// Destined Rivals booster art file served from the public folder
+const DESTINED_PACK_IMAGE_URL = '/71z+NtTb8dL._AC_SL1500_.jpg'
 
 const SET_OPTIONS = [
     { label: 'Prismatic Evolutions', value: 'sv08.5' },
     { label: 'Journey Together', value: 'sv09' },
     { label: 'Destined Rivals', value: 'sv10' }
 ] as const
+
+const THEME_BY_SET: Record<string, 'prismatic' | 'journey' | 'destined'> = {
+    'sv08.5': 'prismatic',
+    sv09: 'journey',
+    sv10: 'destined'
+}
 
 type Card = {
     id: string
@@ -32,6 +44,11 @@ function App() {
     const [selectedSetId, setSelectedSetId] = useState<string>('sv08.5')
 
     const selectedSetName = SET_OPTIONS.find((setOption) => setOption.value === selectedSetId)?.label ?? 'Unknown Set'
+
+    useEffect(() => {
+        const theme = THEME_BY_SET[selectedSetId] ?? 'default'
+        document.body.setAttribute('data-theme', theme)
+    }, [selectedSetId])
 
     const handleSetChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedSetId(event.target.value)
@@ -153,12 +170,17 @@ function App() {
     return (
         <div className="app">
             <header className="app-header">
-                <h1 className="title">🌈 Poke Simulator</h1>
+                <h1 className="title"> Poke Simulator</h1>
                 <div className="set-info">
                     <label className="set-name" htmlFor="set-select">
                         Set
                     </label>
-                    <select id="set-select" className="set-select" value={selectedSetId} onChange={handleSetChange}>
+                    <select
+                        id="set-select"
+                        className="set-select"
+                        value={selectedSetId}
+                        onChange={handleSetChange}
+                    >
                         {SET_OPTIONS.map((setOption) => (
                             <option key={setOption.value} value={setOption.value}>
                                 {setOption.label}
@@ -215,17 +237,35 @@ function App() {
                                     <div className="unopened-pack">
                                         <div className="pack-wrapper">
                                             <div className="booster-pack" onClick={openBoosterPack}>
-                                                <div className="pack-art">
-                                                    <div className="set-logo">
-                                                        <h3>{selectedSetName}</h3>
-                                                        <div className="pack-shine"></div>
+                                                {selectedSetId === 'sv08.5' ? (
+                                                    <img
+                                                        src={PRISMATIC_PACK_IMAGE_URL}
+                                                        alt="Prismatic Evolutions Booster Pack"
+                                                        className="prismatic-pack-image"
+                                                    />
+                                                ) : selectedSetId === 'sv09' ? (
+                                                    <img
+                                                        src={JOURNEY_PACK_IMAGE_URL}
+                                                        alt="Journey Together Booster Pack"
+                                                        className="journey-pack-image"
+                                                    />
+                                                ) : selectedSetId === 'sv10' ? (
+                                                    <img
+                                                        src={DESTINED_PACK_IMAGE_URL}
+                                                        alt="Destined Rivals Booster Pack"
+                                                        className="destined-pack-image"
+                                                    />
+                                                ) : (
+                                                    <div className="pack-art">
+                                                        <div className="set-logo">
+                                                            <h3>{selectedSetName}</h3>
+                                                            <div className="pack-shine"></div>
+                                                        </div>
+                                                        <div className="pack-details">
+                                                            <span className="click-hint">✨ Click to Open ✨</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="pack-details">
-                                                        <span>Scarlet & Violet</span>
-                                                        <span>1 Card Pack</span>
-                                                        <span className="click-hint">✨ Click to Open ✨</span>
-                                                    </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
