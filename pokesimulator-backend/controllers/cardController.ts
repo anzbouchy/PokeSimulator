@@ -1,7 +1,9 @@
 import TCGdex, { type Card as TCGCard } from '@tcgdex/sdk'
 import type { Request, Response } from 'express'
+import { createPricingProvider } from '../pricing/index.js'
 
 const tcgdex = new TCGdex('en')
+const pricingProvider = createPricingProvider()
 
 const DEFAULT_SLOT9_WEIGHTS: Record<string, number> = {
     Rare: 0.7,
@@ -115,7 +117,10 @@ export const getCardById = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Card not found' })
         }
 
-        return res.json(card)
+        return res.json({
+            ...card,
+            price: pricingProvider.getPriceForRarity(card.rarity)
+        })
     } catch {
         return res.status(500).json({ error: 'Failed to fetch card' })
     }
@@ -185,6 +190,7 @@ export const openPack = async (req: Request, res: Response) => {
                 return {
                     id: card.id,
                     rarity: card.rarity ?? null,
+                    price: pricingProvider.getPriceForRarity(card.rarity),
                     cardmarketId: cardWithPricing.pricing?.cardmarket?.idProduct ?? null,
                     image
                 }
