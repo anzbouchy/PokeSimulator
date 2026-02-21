@@ -5,13 +5,6 @@ const tcgdex = new TCGdex('en')
 
 const DEFAULT_SET_ID = 'sv08.5'
 
-const SET_ID_ALIASES: Record<string, string> = {
-    sv8pt5: 'sv08.5',
-    'sv8.5': 'sv08.5',
-    prismatic: 'sv08.5',
-    'prismatic evolutions': 'sv08.5'
-}
-
 const DEFAULT_SLOT9_WEIGHTS: Record<string, number> = {
     Rare: 0.7,
     'Double rare': 0.2,
@@ -38,11 +31,6 @@ const FALLBACK_SLOT10_RARITIES = [
     'Hyper rare',
     'Secret Rare'
 ]
-
-const normalizeSetId = (value: unknown): string => {
-    const raw = String(value || '').trim()
-    return SET_ID_ALIASES[raw.toLowerCase()] || raw || DEFAULT_SET_ID
-}
 
 const pickWeightedRarity = (weights: Record<string, number>): string | null => {
     const entries = Object.entries(weights).filter(([, weight]) => Number(weight) > 0)
@@ -152,7 +140,8 @@ export const getCardById = async (req: Request, res: Response) => {
 
 export const openPack = async (req: Request, res: Response) => {
     try {
-        const setId = normalizeSetId(req.body?.setId)
+        const rawSetId = req.body?.setId
+        const setId = typeof rawSetId === 'string' && rawSetId.trim() ? rawSetId.trim() : DEFAULT_SET_ID
         const setCards = await getSetCards(setId)
 
         if (setCards.length === 0) {
@@ -212,13 +201,7 @@ export const openPack = async (req: Request, res: Response) => {
 
                 return {
                     id: card.id,
-                    name: rawCard.name ?? null,
-                    hp: rawCard.hp ?? null,
-                    types: rawCard.types ?? [],
-                    attacks: rawCard.attacks ?? [],
                     rarity: rawCard.rarity ?? null,
-                    number: rawCard.localId ?? rawCard.number ?? null,
-                    set: rawCard.set ?? null,
                     cardmarketId: cardWithPricing.pricing?.cardmarket?.idProduct ?? null,
                     image
                 }
