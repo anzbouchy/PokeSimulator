@@ -28,70 +28,18 @@ const PokemonCard = ({ pokemon, onClick, isSelected, onEvolution, prismaticEnerg
             backgroundColor: pokemon.color,
             backgroundImage: `linear-gradient(45deg, ${pokemon.color}, ${pokemon.secondaryColor || pokemon.color})`
           }}>
-            <span className="pokemon-emoji">{pokemon.emoji}</span>
+            {pokemon.image ? (
+              <img
+                src={pokemon.image}
+                alt={pokemon.name}
+                className="pokemon-art"
+              />
+            ) : (
+              <span className="pokemon-emoji">{pokemon.emoji}</span>
+            )}
             {pokemon.isPrismatic && (
               <div className="prismatic-glow"></div>
             )}
-          </div>
-        </div>
-        
-        <div className="pokemon-info">
-          <h3 className="pokemon-name">{pokemon.name}</h3>
-          <div className="card-details">
-            <span className="card-number">#{pokemon.cardNumber}</span>
-            <span className={`rarity-badge ${pokemon.rarity?.toLowerCase().replace(/\s+/g, '-')}`}>
-              {pokemon.rarity}
-            </span>
-          </div>
-          <div className="pokemon-types">
-            {pokemon.types.map((type, index) => (
-              <span key={index} className={`type-badge ${type.toLowerCase()}`}>
-                {type}
-              </span>
-            ))}
-          </div>
-          {pokemon.price && pokemon.price !== 'N/A' && (
-            <div className="card-price">
-              <span className="price-label">Market Price:</span>
-              <span className="price-value">{pokemon.price}</span>
-            </div>
-          )}
-          {pokemon.pattern && (
-            <div className="pattern-info">
-              <span className={`pattern-badge ${pokemon.pattern}`}>
-                {pokemon.pattern === 'ultra' ? '⭐ Ultra Rare' : 
-                 pokemon.pattern === 'secret' ? '🔥 Secret Rare' :
-                 pokemon.pattern === 'enhanced' ? '🌟 Enhanced' : pokemon.pattern}
-              </span>
-            </div>
-          )}
-          {pokemon.artist && (
-            <div className="artist-info">
-              <span className="artist-label">Artist:</span>
-              <span className="artist-name">{pokemon.artist}</span>
-            </div>
-          )}
-          <div className="pokemon-stats">
-            <div className="stat">
-              <span className="stat-name">HP</span>
-              <div className="stat-bar">
-                <div 
-                  className="stat-fill hp" 
-                  style={{ width: `${Math.min(100, (pokemon.stats.hp / 300) * 100)}%` }}
-                ></div>
-                <span className="stat-value">{pokemon.stats.hp}</span>
-              </div>
-            </div>
-            <div className="stat">
-              <span className="stat-name">ATK</span>
-              <div className="stat-bar">
-                <div 
-                  className="stat-fill attack" 
-                  style={{ width: `${Math.min(100, (pokemon.stats.attack / 200) * 100)}%` }}
-                ></div>
-                <span className="stat-value">{pokemon.stats.attack}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>

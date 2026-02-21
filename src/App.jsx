@@ -4,6 +4,8 @@ import PokemonCard from './components/PokemonCard'
 import EvolutionTree from './components/EvolutionTreeTCG'
 import tcgdx from './services/tcgdx'
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 // Helper functions for transforming TCG API data
 function getEmojiForPokemon(name) {
   const emojiMap = {
@@ -67,7 +69,12 @@ function getAttackPower(attacks) {
   let maxDamage = 0
   attacks.forEach(attack => {
     if (attack.damage) {
-      const damage = parseInt(attack.damage.replace(/[^0-9]/g, '')) || 0
+      let damage = 0
+      if (typeof attack.damage === 'number') {
+        damage = attack.damage
+      } else {
+        damage = parseInt(String(attack.damage).replace(/[^0-9]/g, '')) || 0
+      }
       maxDamage = Math.max(maxDamage, damage)
     }
   })
@@ -89,10 +96,11 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [setInfo, setSetInfo] = useState(null)
   const [packOpened, setPackOpened] = useState(false)
-  const [availableCards, setAvailableCards] = useState([])
   const [openedCards, setOpenedCards] = useState([])
   const [cardsOpenedCount, setCardsOpenedCount] = useState(0)
   const [showSummary, setShowSummary] = useState(false)
+  const [packCards, setPackCards] = useState([])
+  const [packIndex, setPackIndex] = useState(0)
 
   useEffect(() => {
     async function loadPrismaticEvolutions() {
@@ -103,44 +111,10 @@ function App() {
         
         setSetInfo(set)
         
-        // Transform TCG API data to our format
-        const transformedCards = set.cards.map(card => ({
-          id: card.id,
-          name: card.name,
-          emoji: getEmojiForPokemon(card.name),
-          types: card.types || ['Colorless'],
-          color: getColorForType(card.types?.[0] || 'Colorless'),
-          secondaryColor: getSecondaryColor(card.types?.[0] || 'Colorless'),
-          stats: {
-            hp: parseInt(card.hp) || 0,
-            attack: getAttackPower(card.attacks),
-            defense: 50, // Default since TCG doesn't have defense
-            speed: getSpeedFromRetreat(card.convertedRetreatCost)
-          },
-          rarity: card.rarity,
-          cardNumber: card.number,
-          price: card.tcgplayer?.prices?.holofoil?.market ? 
-                 `$${card.tcgplayer.prices.holofoil.market.toFixed(2)}` :
-                 card.tcgplayer?.prices?.normal?.market ? 
-                 `$${card.tcgplayer.prices.normal.market.toFixed(2)}` : 
-                 'N/A',
-          isPrismatic: card.rarity?.includes('Ultra') || card.rarity?.includes('Secret'),
-          pattern: card.rarity?.includes('Ultra') ? 'ultra' : 
-                  card.rarity?.includes('Secret') ? 'secret' : null,
-          artist: card.artist,
-          setName: card.set?.name,
-          flavorText: card.flavorText || 'A mysterious Pokemon card with incredible power.'
-        }))
-        
-        // Store all available cards
-        setAvailableCards(transformedCards)
-        
         // Start with no card shown (pack not opened)
         setPackOpened(false)
       } catch (error) {
         console.error('Error loading cards:', error)
-        // Fallback to default collection if API fails
-        setAvailableCards([])
       } finally {
         setLoading(false)
       }
@@ -149,93 +123,150 @@ function App() {
     loadPrismaticEvolutions()
   }, [])
 
-  const openBoosterPack = () => {
-    if (availableCards.length === 0) return
-    
-    // If we already have 10 cards, don't open more
-    if (cardsOpenedCount >= 10) return
-    
-    // Generate just 1 card for simple pack opening
-    const packStructure = ['Common']
-    
-    // Chance for rare pulls
-    if (Math.random() < 0.7) { // 70% chance for rare
-      packStructure[0] = 'Rare'
-    }
-    
-    if (Math.random() < 0.15) { // 15% chance for ultra rare
-      packStructure[0] = 'Ultra Rare'
-    }
-    
-    if (Math.random() < 0.03) { // 3% chance for secret rare
-      packStructure[0] = 'Secret Rare'
-    }
-    
-    // Find cards of target rarity
-    const targetRarity = packStructure[0]
-    const cardsOfRarity = availableCards.filter(card => {
-      if (targetRarity === 'Ultra Rare') {
-        return card.rarity?.includes('Ultra') || card.rarity?.includes('Rare Holo')
+  const openBoosterPack = async () => {
+    try {
+      // If we already have a full pack cached, just show the next card
+      if (packCards.length > 0 && packIndex < packCards.length) {
+        const baseCard = packCards[packIndex]
+        const pulledCard = {
+          ...baseCard,
+          pullId: `${baseCard.id}-${Date.now()}-${Math.random()}`
+        }
+
+        setOpenedCards((prev) => [...prev, pulledCard])
+        setCardsOpenedCount((prev) => prev + 1)
+        setPackIndex((prev) => prev + 1)
+        setRevealedCards([pulledCard])
+        setSelectedPokemon(pulledCard)
+        setPackOpened(true)
+
+        if (
+          pulledCard.rarity?.includes('Ultra') ||
+          pulledCard.rarity?.includes('Hyper') ||
+          pulledCard.rarity?.includes('Secret')
+        ) {
+          setPrismaticEnergy((prev) => Math.min(100, prev + 5))
+        }
+
+        return
       }
-      if (targetRarity === 'Secret Rare') {
-        return card.rarity?.includes('Secret')
+
+      // If we've already shown all cards in the cached pack, show summary
+      if (packCards.length > 0 && packIndex >= packCards.length) {
+        setShowSummary(true)
+        setRevealedCards([])
+        setSelectedPokemon(null)
+        setPackOpened(true)
+        return
       }
-      return card.rarity === targetRarity || 
-             (targetRarity === 'Common' && !card.rarity) ||
-             (targetRarity === 'Rare' && card.rarity?.includes('Rare') && !card.rarity?.includes('Ultra'))
-    })
-    
-    // Select random card from rarity pool, fallback to any card
-    const selectedCard = cardsOfRarity.length > 0 
-      ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
-      : availableCards[Math.floor(Math.random() * availableCards.length)]
-    
-    // Add unique identifier
-    const pulledCard = {
-      ...selectedCard,
-      pullId: `${selectedCard.id}-${Date.now()}-${Math.random()}`
-    }
-    
-    // Add to opened cards collection
-    const newOpenedCards = [...openedCards, pulledCard]
-    setOpenedCards(newOpenedCards)
-    
-    // Increment count
-    const newCount = cardsOpenedCount + 1
-    setCardsOpenedCount(newCount)
-    
-    // Show summary after 10 cards, otherwise show individual card
-    if (newCount >= 10) {
-      setShowSummary(true)
-      setRevealedCards([])
-      setSelectedPokemon(null)
-    } else {
-      setRevealedCards([pulledCard]) // Show individual card for cards 1-9
+
+      // First time: try to fetch one pack of cards from the backend
+      let pack = null
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/cards/pack`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ setId: 'sv8pt5' })
+        })
+
+        if (response.ok) {
+          pack = await response.json()
+        } else {
+          console.error('Backend pack error:', response.status)
+        }
+      } catch (error) {
+        console.error('Backend pack request failed:', error)
+      }
+
+      // Fallback: if backend failed, use first 10 cards from tcgdx set
+      if (!Array.isArray(pack) || pack.length === 0) {
+        try {
+          const fallbackSet = await tcgdx.set.get('sv4pt5')
+          if (fallbackSet && Array.isArray(fallbackSet.cards) && fallbackSet.cards.length > 0) {
+            pack = fallbackSet.cards.slice(0, 10).map((card) => ({
+              id: card.id,
+              name: card.name,
+              hp: card.hp,
+              types: card.types,
+              attacks: card.attacks,
+              rarity: card.rarity,
+              number: card.number,
+              set: { name: fallbackSet.name },
+              image: card.images?.large || card.images?.small || null
+            }))
+          }
+        } catch (error) {
+          console.error('Fallback pack build failed:', error)
+        }
+      }
+
+      if (!Array.isArray(pack) || pack.length === 0) {
+        return
+      }
+
+      const transformedPack = pack.map((rawCard) => ({
+        id: rawCard.id,
+        name: rawCard.name,
+        emoji: getEmojiForPokemon(rawCard.name || ''),
+        image: rawCard.image || null,
+        types: rawCard.types && rawCard.types.length > 0 ? rawCard.types : ['Colorless'],
+        color: getColorForType(rawCard.types?.[0] || 'Colorless'),
+        secondaryColor: getSecondaryColor(rawCard.types?.[0] || 'Colorless'),
+        stats: {
+          hp: parseInt(rawCard.hp) || 0,
+          attack: getAttackPower(rawCard.attacks),
+          defense: 50,
+          speed: getSpeedFromRetreat(rawCard.convertedRetreatCost || 0)
+        },
+        rarity: rawCard.rarity,
+        cardNumber: rawCard.number,
+        price: 'N/A',
+        isPrismatic:
+          rawCard.rarity?.includes('Ultra') ||
+          rawCard.rarity?.includes('Hyper') ||
+          rawCard.rarity?.includes('Secret'),
+        pattern: rawCard.rarity?.includes('Ultra')
+          ? 'ultra'
+          : rawCard.rarity?.includes('Secret')
+          ? 'secret'
+          : null,
+        artist: rawCard.artist,
+        setName: rawCard.set?.name,
+        flavorText: rawCard.flavorText || 'A mysterious Pokemon card with incredible power.'
+      }))
+
+      setPackCards(transformedPack)
+      setPackIndex(0)
+
+      // Immediately show the first card from the new pack
+      const firstCard = transformedPack[0]
+      const pulledCard = {
+        ...firstCard,
+        pullId: `${firstCard.id}-${Date.now()}-${Math.random()}`
+      }
+
+      setOpenedCards([pulledCard])
+      setCardsOpenedCount(1)
+      setPackIndex(1)
+      setRevealedCards([pulledCard])
       setSelectedPokemon(pulledCard)
-    }
-    
-    setPackOpened(true)
-    
-    // Pack opening excitement based on rarity
-    if (pulledCard.rarity?.includes('Ultra') || pulledCard.rarity?.includes('Secret')) {
-      setPrismaticEnergy(prev => Math.min(100, prev + 5))
+      setPackOpened(true)
+
+      if (
+        pulledCard.rarity?.includes('Ultra') ||
+        pulledCard.rarity?.includes('Hyper') ||
+        pulledCard.rarity?.includes('Secret')
+      ) {
+        setPrismaticEnergy((prev) => Math.min(100, prev + 5))
+      }
+    } catch (error) {
+      console.error('Error opening pack from backend:', error)
     }
   }
   
-  const openNewPack = () => {
-    if (showSummary) return // Don't open new packs when showing summary
-    
-    setSelectedPokemon(null)
-    setRevealedCards([])
-    setPackOpened(false)
-    // Reset energy for new pack
-    setPrismaticEnergy(prev => Math.max(50, prev - 10))
-    
-    // Automatically open the next pack
-    setTimeout(() => {
-      openBoosterPack()
-    }, 100)
-  }
 
   const resetSession = () => {
     setSelectedPokemon(null)
@@ -245,6 +276,8 @@ function App() {
     setCardsOpenedCount(0)
     setShowSummary(false)
     setPrismaticEnergy(100)
+    setPackCards([])
+    setPackIndex(0)
   }
 
   const calculateTotalPrice = () => {
@@ -260,7 +293,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="title">🌈 Pokemon Prismatic Evolutions</h1>
+        <h1 className="title">🌈 Poke Simulator</h1>
         {setInfo && (
           <div className="set-info">
             <span className="set-name">{setInfo.name}</span>
@@ -268,7 +301,7 @@ function App() {
             <span className="set-total">{setInfo.total} cards</span>
           </div>
         )}
-        <div className="energy-bar">
+        {/* <div className="energy-bar">
           <span>Prismatic Energy: </span>
           <div className="energy-container">
             <div 
@@ -277,7 +310,7 @@ function App() {
             ></div>
             <span className="energy-text">{prismaticEnergy}/100</span>
           </div>
-        </div>
+        </div> */}
         <div className="card-counter">
           <span>Cards Opened: {cardsOpenedCount}/10</span>
           {cardsOpenedCount > 0 && (
@@ -351,10 +384,10 @@ function App() {
                     <div className="opened-pack">
                       <div className="pack-results">
                         <div className="single-card-container">
-                          {/* Show the revealed Pokemon card directly - clickable to open new pack */}
+                          {/* Show the revealed Pokemon card directly - click to reveal next card */}
                           {revealedCards.length > 0 && (
                             <div className="revealed-pokemon-card">
-                              <div className="clickable-pokemon-card" onClick={cardsOpenedCount < 10 ? openNewPack : undefined}>
+                              <div className="clickable-pokemon-card" onClick={openBoosterPack}>
                                 <PokemonCard 
                                   pokemon={revealedCards[0]}
                                   onClick={() => {}} // Prevent double click handling
