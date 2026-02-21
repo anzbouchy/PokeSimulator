@@ -1,0 +1,9 @@
+flowchart LR
+  U[User] --> FE[Frontend\nReact + Vite]
+  FE -->|POST /api/cards/pack\nsetId| API[Backend API\nNode.js + Express + TypeScript]
+  API --> CTRL[Pack Logic\nslot + rarity rules]
+  CTRL --> TCG[TCGdex SDK]
+  TCG --> EXT[TCGdex Data API]
+  API -. optional .-> DB[(PostgreSQL)]
+  API --> FE
+  FE --> U

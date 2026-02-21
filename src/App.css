@@ -12,11 +12,19 @@
   --poke-bg-mid: #1f3a93;
   --poke-bg-end: #ffcb05;
 
-  --poke-primary: #1f3a93;      /* logo blue */
-  --poke-secondary: #2854c5;    /* lighter blue */
-  --poke-yellow: #ffcb05;       /* logo yellow */
-  --poke-yellow-soft: #ffe066;  /* softer yellow */
-  --poke-red: #c62828;          /* accent red */
+  --poke-primary: #1f3a93;
+  /* logo blue */
+  --poke-secondary: #2854c5;
+  /* lighter blue */
+  --poke-yellow: #ffcb05;
+  /* logo yellow */
+  --poke-yellow-soft: #ffe066;
+  /* softer yellow */
+  --poke-red: #c62828;
+  /* accent red */
+
+  --tcg-card-width: 360px;
+  --tcg-card-aspect: 600 / 825;
 }
 
 body {
@@ -489,11 +497,13 @@ body[data-theme='destined'] .app {
     transform: scale(0.85) translateY(8px);
     box-shadow: 0 0 0 rgba(255, 120, 80, 0);
   }
+
   40% {
     opacity: 1;
     transform: scale(1.02) translateY(0);
     box-shadow: 0 0 35px rgba(255, 160, 90, 0.8), 0 0 70px rgba(255, 220, 150, 0.9);
   }
+
   100% {
     opacity: 0.2;
     transform: scale(1) translateY(-6px);
@@ -530,11 +540,13 @@ body[data-theme='destined'] .app {
     transform: scale(0.9);
     box-shadow: 0 0 0 rgba(160, 120, 255, 0);
   }
+
   40% {
     opacity: 0.6;
     transform: scale(1.02);
     box-shadow: 0 0 18px rgba(160, 120, 255, 0.5), 0 0 30px rgba(120, 200, 255, 0.4);
   }
+
   100% {
     opacity: 0.12;
     transform: scale(1);
@@ -691,8 +703,9 @@ body[data-theme='destined'] .app {
 }
 
 .booster-pack {
-  width: 280px;
-  height: 400px;
+  width: min(78vw, var(--tcg-card-width));
+  aspect-ratio: var(--tcg-card-aspect);
+  height: auto;
   background: linear-gradient(135deg, var(--poke-primary) 0%, var(--poke-secondary) 45%, var(--poke-yellow) 100%);
   border-radius: 20px;
   padding: 20px;
@@ -1190,7 +1203,7 @@ body[data-theme='prismatic'] .set-logo h3 {
   align-items: center;
   min-height: 500px;
   width: 100%;
-  max-width: 400px;
+  max-width: var(--tcg-card-width);
   margin: 0 auto;
 }
 
@@ -1277,11 +1290,35 @@ body[data-theme='prismatic'] .set-logo h3 {
 
 /* Revealed Pokemon Card Display */
 .revealed-pokemon-card {
-  width: 100%;
-  max-width: 350px;
+  width: min(78vw, var(--tcg-card-width));
+  max-width: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 25px;
   animation: pokemonReveal 0.8s ease-out;
+}
+
+.clickable-pokemon-card {
+  width: 100%;
+  aspect-ratio: var(--tcg-card-aspect);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-pokemon-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
+}
+
+.clickable-pokemon-card .pokemon-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
 }

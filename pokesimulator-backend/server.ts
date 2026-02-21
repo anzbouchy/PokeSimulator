@@ -6,6 +6,7 @@ import { connectToDatabase } from './db.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
+const REQUIRE_POSTGRES = String(process.env.REQUIRE_POSTGRES || 'false').toLowerCase() === 'true'
 
 app.use(cors())
 app.use(express.json())
@@ -18,7 +19,11 @@ app.use('/api/cards', cardRoutes)
 
 const startServer = async () => {
     try {
-        await connectToDatabase()
+        if (REQUIRE_POSTGRES) {
+            await connectToDatabase()
+        } else {
+            console.log('Skipping PostgreSQL connection check (set REQUIRE_POSTGRES=true to enforce)')
+        }
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`)
