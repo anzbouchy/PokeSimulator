@@ -3,15 +3,6 @@ import type { Request, Response } from 'express'
 
 const tcgdex = new TCGdex('en')
 
-const DEFAULT_SET_ID = 'sv08.5'
-
-const SET_ID_ALIASES: Record<string, string> = {
-    sv8pt5: 'sv08.5',
-    'sv8.5': 'sv08.5',
-    prismatic: 'sv08.5',
-    'prismatic evolutions': 'sv08.5'
-}
-
 const DEFAULT_SLOT9_WEIGHTS: Record<string, number> = {
     Rare: 0.7,
     'Double rare': 0.2,
@@ -28,20 +19,8 @@ const DEFAULT_SLOT10_WEIGHTS: Record<string, number> = {
     'Hyper rare': 0.015
 }
 
-const FALLBACK_SLOT10_RARITIES = [
-    'Rare',
-    'Double rare',
-    'ACE SPEC Rare',
-    'Illustration rare',
-    'Ultra Rare',
-    'Special illustration rare',
-    'Hyper rare',
-    'Secret Rare'
-]
-
 const normalizeSetId = (value: unknown): string => {
-    const raw = String(value || '').trim()
-    return SET_ID_ALIASES[raw.toLowerCase()] || raw || DEFAULT_SET_ID
+    return String(value || '').trim()
 }
 
 const pickWeightedRarity = (weights: Record<string, number>): string | null => {
@@ -80,26 +59,18 @@ const drawFromPool = (
     return chosen
 }
 
-const drawByRarityWithFallback = (
-    cards: TCGCard[],
-    usedCardIds: Set<string>,
-    weights: Record<string, number>,
-    fallbackRarities: string[]
-): TCGCard | null => {
-    const targetRarity = pickWeightedRarity(weights)
+const drawByRarity = (cards: TCGCard[], usedCardIds: Set<string>, weights: Record<string, number>): TCGCard | null => {
+    const availableWeights = Object.fromEntries(
+        Object.entries(weights).filter(
+            ([rarity, weight]) =>
+                Number(weight) > 0 && cards.some((card) => card.rarity === rarity && !usedCardIds.has(card.id))
+        )
+    )
+
+    const targetRarity = pickWeightedRarity(availableWeights)
 
     if (targetRarity) {
-        const chosenByWeight = drawFromPool(cards, (card) => card.rarity === targetRarity, usedCardIds)
-        if (chosenByWeight) {
-            return chosenByWeight
-        }
-    }
-
-    for (const fallbackRarity of fallbackRarities) {
-        const fallbackCard = drawFromPool(cards, (card) => card.rarity === fallbackRarity, usedCardIds)
-        if (fallbackCard) {
-            return fallbackCard
-        }
+        return drawFromPool(cards, (card) => card.rarity === targetRarity, usedCardIds)
     }
 
     return null
@@ -153,6 +124,11 @@ export const getCardById = async (req: Request, res: Response) => {
 export const openPack = async (req: Request, res: Response) => {
     try {
         const setId = normalizeSetId(req.body?.setId)
+
+        if (!setId) {
+            return res.status(400).json({ error: 'setId is required' })
+        }
+
         const setCards = await getSetCards(setId)
 
         if (setCards.length === 0) {
@@ -180,16 +156,13 @@ export const openPack = async (req: Request, res: Response) => {
         addCard(drawFromPool(setCards, (card) => card.rarity === 'Rare', usedCardIds), 'Guaranteed Rare')
 
         addCard(
-            drawByRarityWithFallback(setCards, usedCardIds, DEFAULT_SLOT9_WEIGHTS, ['Rare', 'Double rare', 'ACE SPEC Rare']),
+            drawByRarity(setCards, usedCardIds, DEFAULT_SLOT9_WEIGHTS),
             'Weighted Rare/Double Rare/ACE SPEC Rare'
         )
 
-        addCard(
-            drawByRarityWithFallback(setCards, usedCardIds, DEFAULT_SLOT10_WEIGHTS, FALLBACK_SLOT10_RARITIES),
-            'Weighted high-rarity slot'
-        )
+        addCard(drawByRarity(setCards, usedCardIds, DEFAULT_SLOT10_WEIGHTS), 'Weighted high-rarity slot')
 
-        const cardsWithDetails = await Promise.all(
+        const cardsWithImages = await Promise.all(
             pack.map(async (card) => {
                 let image: string | null = null
                 const cardWithPricing = card as TCGCard & {
@@ -199,7 +172,6 @@ export const openPack = async (req: Request, res: Response) => {
                         }
                     }
                 }
-                const rawCard = card as any
 
                 try {
                     const cardModel = await tcgdex.card.get(card.id)
@@ -212,20 +184,14 @@ export const openPack = async (req: Request, res: Response) => {
 
                 return {
                     id: card.id,
-                    name: rawCard.name ?? null,
-                    hp: rawCard.hp ?? null,
-                    types: rawCard.types ?? [],
-                    attacks: rawCard.attacks ?? [],
-                    rarity: rawCard.rarity ?? null,
-                    number: rawCard.localId ?? rawCard.number ?? null,
-                    set: rawCard.set ?? null,
+                    rarity: card.rarity ?? null,
                     cardmarketId: cardWithPricing.pricing?.cardmarket?.idProduct ?? null,
                     image
                 }
             })
         )
 
-        return res.json(cardsWithDetails)
+        return res.json(cardsWithImages)
     } catch (error) {
         return res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to open pack' })
     }
