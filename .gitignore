@@ -26,3 +26,8 @@ dist-ssr
 docker_data
 
 .env
+.env.*
+!.env.example
+*.tsbuildinfo
+coverage
+.nyc_output
