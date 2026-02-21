@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
 import './App.css'
+import PackEconomics from './components/PackEconomics'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 // Prismatic Evolutions booster art file served from the public folder
@@ -19,6 +20,14 @@ const THEME_BY_SET: Record<string, 'prismatic' | 'journey' | 'destined'> = {
     'sv08.5': 'prismatic',
     sv09: 'journey',
     sv10: 'destined'
+}
+
+const DEFAULT_PACK_COST = 4.99
+
+const PACK_COST_BY_SET: Record<string, number> = {
+    'sv08.5': 2.10,
+    'sv09': 4.49,
+    'sv10': 5.00
 }
 
 type Card = {
@@ -49,6 +58,7 @@ function App() {
         const theme = THEME_BY_SET[selectedSetId] ?? 'default'
         document.body.setAttribute('data-theme', theme)
     }, [selectedSetId])
+    const currentPackCost = PACK_COST_BY_SET[selectedSetId] ?? DEFAULT_PACK_COST
 
     const handleSetChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedSetId(event.target.value)
@@ -111,6 +121,12 @@ function App() {
                 cardmarketId: rawCard.cardmarketId,
                 image: rawCard.image,
                 rarity: rawCard.rarity,
+                price:
+                    typeof rawCard.price?.amount === 'number'
+                        ? `$${rawCard.price.amount.toFixed(2)}`
+                        : typeof rawCard.price === 'string'
+                            ? rawCard.price
+                            : undefined,
                 // minimal extra fields for display
                 color: '#1b2230',
                 secondaryColor: '#3a4b6a',
@@ -299,6 +315,12 @@ function App() {
                             </div>
                         )}
                     </section>
+
+                    <PackEconomics
+                        packCost={currentPackCost}
+                        revealedValue={calculateTotalPrice()}
+                        cardsRevealed={cardsOpenedCount}
+                    />
 
                     {/* Evolution tree and history removed for a simpler image-only view */}
                 </>
