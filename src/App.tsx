@@ -13,6 +13,7 @@ type Card = {
     id: string
     cardmarketId?: number
     image: string
+    rarity?: string
     color?: string
     secondaryColor?: string
     emoji?: string
@@ -92,6 +93,7 @@ function App() {
                 id: rawCard.id,
                 cardmarketId: rawCard.cardmarketId,
                 image: rawCard.image,
+                rarity: rawCard.rarity,
                 // minimal extra fields for display
                 color: '#1b2230',
                 secondaryColor: '#3a4b6a',
@@ -117,6 +119,17 @@ function App() {
             console.error('Error opening pack from backend:', error)
         }
     }
+
+    const currentCard = revealedCards[0]
+    const rarityLower =
+        typeof currentCard?.rarity === 'string' ? currentCard.rarity.toLowerCase() : ''
+
+    const isSpecialOrHyperRare = Boolean(
+        rarityLower &&
+        (rarityLower.includes('special illustration rare') || rarityLower.includes('hyper rare'))
+    )
+
+    const isAceSpecRare = Boolean(rarityLower && rarityLower.includes('ace spec'))
 
     const resetSession = () => {
         setRevealedCards([])
@@ -221,12 +234,19 @@ function App() {
                                         <div className="pack-results">
                                             <div className="single-card-container">
                                                 {/* Show the revealed Pokemon card directly - click to reveal next card */}
-                                                {revealedCards.length > 0 && revealedCards[0].image && (
+                                                {currentCard && currentCard.image && (
                                                     <div className="revealed-pokemon-card">
-                                                        <div className="clickable-pokemon-card" onClick={openBoosterPack}>
+                                                        <div
+                                                            className={`clickable-pokemon-card${isSpecialOrHyperRare
+                                                                ? ' fire-spark-card'
+                                                                : isAceSpecRare
+                                                                    ? ' ace-spec-card'
+                                                                    : ''}`}
+                                                            onClick={openBoosterPack}
+                                                        >
                                                             <img
-                                                                src={revealedCards[0].image}
-                                                                alt={revealedCards[0].id || 'Card'}
+                                                                src={currentCard.image}
+                                                                alt={currentCard.id || 'Card'}
                                                                 className="pokemon-art"
                                                             />
                                                         </div>
