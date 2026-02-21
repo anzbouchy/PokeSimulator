@@ -189,7 +189,7 @@ export const openPack = async (req: Request, res: Response) => {
             'Weighted high-rarity slot'
         )
 
-        const cardsWithImages = await Promise.all(
+        const cardsWithDetails = await Promise.all(
             pack.map(async (card) => {
                 let image: string | null = null
                 const cardWithPricing = card as TCGCard & {
@@ -199,6 +199,7 @@ export const openPack = async (req: Request, res: Response) => {
                         }
                     }
                 }
+                const rawCard = card as any
 
                 try {
                     const cardModel = await tcgdex.card.get(card.id)
@@ -211,13 +212,20 @@ export const openPack = async (req: Request, res: Response) => {
 
                 return {
                     id: card.id,
+                    name: rawCard.name ?? null,
+                    hp: rawCard.hp ?? null,
+                    types: rawCard.types ?? [],
+                    attacks: rawCard.attacks ?? [],
+                    rarity: rawCard.rarity ?? null,
+                    number: rawCard.localId ?? rawCard.number ?? null,
+                    set: rawCard.set ?? null,
                     cardmarketId: cardWithPricing.pricing?.cardmarket?.idProduct ?? null,
                     image
                 }
             })
         )
 
-        return res.json(cardsWithImages)
+        return res.json(cardsWithDetails)
     } catch (error) {
         return res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to open pack' })
     }
