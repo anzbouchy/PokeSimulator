@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 docker_data
+
+.env
