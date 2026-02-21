@@ -15,7 +15,7 @@ function PackEconomics({
     revealedValue,
     cardsRevealed,
     totalCards = 10,
-    currencySymbol = '$'
+    currencySymbol = '£'
 }: PackEconomicsProps) {
     const valueDelta = revealedValue - packCost
 

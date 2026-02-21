@@ -1,15 +1,10 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
 import './App.css'
+import AppHeader from './components/AppHeader'
+import BoosterPackView from './components/BoosterPackView'
 import PackEconomics from './components/PackEconomics'
-import OpenedCardsStack from './components/OpenedCardsStack'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-// Prismatic Evolutions booster art file served from the public folder
-const PRISMATIC_PACK_IMAGE_URL = '/2_276528_e.webp'
-// Journey Together booster art file served from the public folder
-const JOURNEY_PACK_IMAGE_URL = '/2_284400_e.webp'
-// Destined Rivals booster art file served from the public folder
-const DESTINED_PACK_IMAGE_URL = '/71z+NtTb8dL._AC_SL1500_.jpg'
 
 const SET_OPTIONS = [
     { label: 'Prismatic Evolutions', value: 'sv08.5' },
@@ -153,15 +148,6 @@ function App() {
 
     const currentCard = revealedCards[0]
     const isPackComplete = packCards.length > 0 && packIndex >= packCards.length
-    const rarityLower =
-        typeof currentCard?.rarity === 'string' ? currentCard.rarity.toLowerCase() : ''
-
-    const isSpecialOrHyperRare = Boolean(
-        rarityLower &&
-        (rarityLower.includes('special illustration rare') || rarityLower.includes('hyper rare'))
-    )
-
-    const isAceSpecRare = Boolean(rarityLower && rarityLower.includes('ace spec'))
 
     const resetSession = () => {
         setRevealedCards([])
@@ -183,119 +169,31 @@ function App() {
 
     return (
         <div className="app">
-            <header className="app-header">
-                <h1 className="title"> Poke Simulator</h1>
-                <div className="set-info">
-                    <label className="set-name" htmlFor="set-select">
-                        Set
-                    </label>
-                    <select
-                        id="set-select"
-                        className="set-select"
-                        value={selectedSetId}
-                        onChange={handleSetChange}
-                    >
-                        {SET_OPTIONS.map((setOption) => (
-                            <option key={setOption.value} value={setOption.value}>
-                                {setOption.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="card-counter">
-                    <span>Cards Opened: {cardsOpenedCount}/10</span>
-                    {cardsOpenedCount > 0 && (
-                        <button className="reset-btn" onClick={resetSession}>
-                            🔄
-                        </button>
-                    )}
-                </div>
-            </header>
+            <AppHeader
+                setOptions={SET_OPTIONS}
+                selectedSetId={selectedSetId}
+                cardsOpenedCount={cardsOpenedCount}
+                onSetChange={handleSetChange}
+                onResetSession={resetSession}
+            />
 
             <main className="main-content">
-                <>
-                    <section className="pack-opening-section">
-                        <div className="booster-pack-container">
-                            {cardsOpenedCount === 0 ? (
-                                <div className="unopened-pack">
-                                    <div className="pack-wrapper">
-                                        <div className="booster-pack" onClick={openBoosterPack}>
-                                            {selectedSetId === 'sv08.5' ? (
-                                                <img
-                                                    src={PRISMATIC_PACK_IMAGE_URL}
-                                                    alt="Prismatic Evolutions Booster Pack"
-                                                    className="prismatic-pack-image"
-                                                />
-                                            ) : selectedSetId === 'sv09' ? (
-                                                <img
-                                                    src={JOURNEY_PACK_IMAGE_URL}
-                                                    alt="Journey Together Booster Pack"
-                                                    className="journey-pack-image"
-                                                />
-                                            ) : selectedSetId === 'sv10' ? (
-                                                <img
-                                                    src={DESTINED_PACK_IMAGE_URL}
-                                                    alt="Destined Rivals Booster Pack"
-                                                    className="destined-pack-image"
-                                                />
-                                            ) : (
-                                                <div className="pack-art">
-                                                    <div className="set-logo">
-                                                        <h3>{selectedSetName}</h3>
-                                                        <div className="pack-shine"></div>
-                                                    </div>
-                                                    <div className="pack-details">
-                                                        <span className="click-hint">✨ Click to Open ✨</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : isPackComplete ? (
-                                <OpenedCardsStack
-                                    cards={openedCards}
-                                    setName={selectedSetName}
-                                    onStartOver={resetSession}
-                                />
-                            ) : (
-                                <div className="opened-pack">
-                                    <div className="pack-results">
-                                        <div className="single-card-container">
-                                            {/* Show the revealed Pokemon card directly - click to reveal next card */}
-                                            {currentCard && currentCard.image && (
-                                                <div className="revealed-pokemon-card">
-                                                    <div
-                                                        className={`clickable-pokemon-card${isSpecialOrHyperRare
-                                                            ? ' fire-spark-card'
-                                                            : isAceSpecRare
-                                                                ? ' ace-spec-card'
-                                                                : ''}`}
-                                                        onClick={openBoosterPack}
-                                                    >
-                                                        <img
-                                                            src={currentCard.image}
-                                                            alt={currentCard.id || 'Card'}
-                                                            className="pokemon-art"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </section>
+                <BoosterPackView
+                    cardsOpenedCount={cardsOpenedCount}
+                    isPackComplete={isPackComplete}
+                    openedCards={openedCards}
+                    selectedSetId={selectedSetId}
+                    selectedSetName={selectedSetName}
+                    currentCard={currentCard}
+                    onOpenBoosterPack={openBoosterPack}
+                    onResetSession={resetSession}
+                />
 
-                    <PackEconomics
-                        packCost={currentPackCost}
-                        revealedValue={calculateTotalPrice()}
-                        cardsRevealed={cardsOpenedCount}
-                    />
-
-                    {/* Evolution tree and history removed for a simpler image-only view */}
-                </>
+                <PackEconomics
+                    packCost={currentPackCost}
+                    revealedValue={calculateTotalPrice()}
+                    cardsRevealed={cardsOpenedCount}
+                />
             </main>
         </div>
     )
