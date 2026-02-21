@@ -184,6 +184,7 @@ export const openPack = async (req: Request, res: Response) => {
 
                 return {
                     id: card.id,
+                    rarity: card.rarity ?? null,
                     cardmarketId: cardWithPricing.pricing?.cardmarket?.idProduct ?? null,
                     image
                 }
