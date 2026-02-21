@@ -1,7 +1,13 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import './App.css'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+const SET_OPTIONS = [
+    { label: 'Prismatic Evolutions', value: 'sv08.5' },
+    { label: 'Journey Together', value: 'sv09' },
+    { label: 'Destined Rivals', value: 'sv10' }
+] as const
 
 type Card = {
     id: string
@@ -22,6 +28,14 @@ function App() {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [packCards, setPackCards] = useState<Card[]>([])
     const [packIndex, setPackIndex] = useState<number>(0)
+    const [selectedSetId, setSelectedSetId] = useState<string>('sv08.5')
+
+    const selectedSetName = SET_OPTIONS.find((setOption) => setOption.value === selectedSetId)?.label ?? 'Unknown Set'
+
+    const handleSetChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedSetId(event.target.value)
+        resetSession()
+    }
 
     const openBoosterPack = async () => {
         try {
@@ -57,7 +71,7 @@ function App() {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ setId: 'sv8pt5' })
+                    body: JSON.stringify({ setId: selectedSetId })
                 })
 
                 if (response.ok) {
@@ -127,7 +141,18 @@ function App() {
         <div className="app">
             <header className="app-header">
                 <h1 className="title">🌈 Poke Simulator</h1>
-                {/* Set info removed since we now rely only on backend images */}
+                <div className="set-info">
+                    <label className="set-name" htmlFor="set-select">
+                        Set
+                    </label>
+                    <select id="set-select" className="set-select" value={selectedSetId} onChange={handleSetChange}>
+                        {SET_OPTIONS.map((setOption) => (
+                            <option key={setOption.value} value={setOption.value}>
+                                {setOption.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <div className="card-counter">
                     <span>Cards Opened: {cardsOpenedCount}/10</span>
                     {cardsOpenedCount > 0 && (
@@ -137,7 +162,7 @@ function App() {
                     )}
                 </div>
             </header>
-			
+
             <main className="main-content">
                 <>
                     <section className="pack-opening-section">
@@ -179,7 +204,7 @@ function App() {
                                             <div className="booster-pack" onClick={openBoosterPack}>
                                                 <div className="pack-art">
                                                     <div className="set-logo">
-                                                        <h3>Prismatic Evolutions</h3>
+                                                        <h3>{selectedSetName}</h3>
                                                         <div className="pack-shine"></div>
                                                     </div>
                                                     <div className="pack-details">
@@ -214,7 +239,7 @@ function App() {
                             </div>
                         )}
                     </section>
-					
+
                     {/* Evolution tree and history removed for a simpler image-only view */}
                 </>
             </main>

@@ -59,6 +59,16 @@ body {
   font-size: 1.1rem;
 }
 
+.set-select {
+  border: 1px solid rgba(103, 126, 234, 0.35);
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: white;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .set-series {
   color: #666;
   font-style: italic;
@@ -94,13 +104,25 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes prismaticText {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .energy-bar {
@@ -141,8 +163,13 @@ body {
 }
 
 @keyframes energyShine {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }
 
 .energy-text {
@@ -240,19 +267,25 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, 
-    rgba(255, 107, 107, 0.05), 
-    rgba(78, 205, 196, 0.05), 
-    rgba(69, 183, 209, 0.05),
-    rgba(150, 206, 180, 0.05)
-  );
+  background: linear-gradient(45deg,
+      rgba(255, 107, 107, 0.05),
+      rgba(78, 205, 196, 0.05),
+      rgba(69, 183, 209, 0.05),
+      rgba(150, 206, 180, 0.05));
   z-index: 0;
   animation: cardShimmer 8s ease-in-out infinite;
 }
 
 @keyframes cardShimmer {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .collection-title {
@@ -273,8 +306,15 @@ body {
 }
 
 @keyframes titleGradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .pokemon-collection h2 {
@@ -322,7 +362,9 @@ body {
 }
 
 @keyframes prismaticBorderSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pokemon-card .card-inner {
@@ -332,7 +374,7 @@ body {
   height: 100%;
   border-radius: 18px;
   padding: 10px 12px;
-  background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.7), rgba(40,44,52,0.95));
+  background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.7), rgba(40, 44, 52, 0.95));
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -358,7 +400,7 @@ body {
   justify-content: center;
   font-size: 3rem;
   position: relative;
-  box-shadow: inset 0 0 25px rgba(0,0,0,0.45);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.45);
 }
 
 .pokemon-sprite .pokemon-emoji {
@@ -376,7 +418,7 @@ body {
 }
 
 .pokemon-info {
-  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(230,230,240,0.98));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(230, 230, 240, 0.98));
   border-radius: 12px;
   padding: 8px 10px 10px;
   display: flex;
@@ -428,7 +470,7 @@ body {
   font-size: 0.65rem;
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .card-price {
@@ -575,9 +617,11 @@ body {
   -webkit-text-fill-color: transparent;
   animation: logoShine 3s ease-in-out infinite;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -656,10 +700,13 @@ body {
 }
 
 @keyframes pulseClickable {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 0 10px rgba(78, 205, 196, 0);
   }
 }
@@ -681,10 +728,12 @@ body {
     opacity: 0;
     transform: scale(0.5) rotateX(-90deg);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.1) rotateX(-45deg);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) rotateX(0deg);
@@ -705,8 +754,17 @@ body {
 }
 
 @keyframes rarityPulse {
-  0%, 100% { transform: scale(0.8); opacity: 0.3; }
-  50% { transform: scale(1.2); opacity: 0.7; }
+
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 .pull-result {
@@ -731,8 +789,15 @@ body {
 }
 
 @keyframes announcementShine {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .flavor-text {
@@ -825,8 +890,15 @@ body {
 }
 
 @keyframes statValueGlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Card Back Design */
@@ -855,8 +927,15 @@ body {
 }
 
 @keyframes logoFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .card-back-text {
@@ -871,8 +950,15 @@ body {
 }
 
 @keyframes textShine {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .card-back-shine {
@@ -888,8 +974,13 @@ body {
 }
 
 @keyframes cardBackShine {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Single Card Container */
@@ -925,10 +1016,12 @@ body {
     opacity: 0;
     transform: scale(0.3) rotateY(180deg);
   }
+
   50% {
     opacity: 0.8;
     transform: scale(1.1) rotateY(90deg);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) rotateY(0deg);
@@ -953,8 +1046,15 @@ body {
 }
 
 @keyframes messageShine {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .card-back.clickable {
@@ -962,11 +1062,14 @@ body {
 }
 
 @keyframes pulseClickable {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transform: scale(1);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 8px 30px rgba(78, 205, 196, 0.4);
     transform: scale(1.05);
   }
