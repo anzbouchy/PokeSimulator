@@ -14,3 +14,17 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## License
+
+This repository is licensed under the MIT License. See [LICENSE](./LICENSE).
+
+## Data Attribution
+
+This project uses open-source Pokémon card data from TCGdex cards-database (MIT).
+Card image data/URLs are also sourced via the TCGdex API.
+See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+
+## Licenses
+
+This project and database are not produced, endorsed, supported, or affiliated with Nintendo, Game Freak, Creatures Inc., or The Pokémon Company.
