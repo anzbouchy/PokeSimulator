@@ -7,7 +7,9 @@
     "build": "tsc -p tsconfig.json",
     "start": "npm run build && node dist/server.js",
     "dev": "tsx watch server.ts",
-    "migrate": "node scripts/run-migrations.js"
+    "migrate": "node scripts/run-migrations.js",
+    "test": "npm run test:unit",
+    "test:unit": "npm run build && node --test tests"
   },
   "keywords": [],
   "author": "",
